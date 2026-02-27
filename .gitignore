@@ -1,0 +1,18 @@
+# Virtual Environments
+venv/
+env/
+.venv/
+
+# Data Files
+data/
+
+# Logs
+logs/
+*.log
+
+# Environment Variables
+.env
+
+# Python Cache
+__pycache__/
+*.pyc
