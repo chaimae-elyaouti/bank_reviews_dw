@@ -42,20 +42,38 @@ class GoogleMapsScraper:
         
         try:
             barre_recherche = self.page.locator('input[name="q"]')
-            
             barre_recherche.wait_for(timeout=5000)
-            
             barre_recherche.fill(query)
-            logging.info("Texte tapé avec succès.")
-            
             self.page.keyboard.press("Enter")
             
+            logging.info("Attente de la liste des agences...")
+            self.page.wait_for_selector('a.hfpxzc', timeout=10000)
+            
+            liste_agences = self.page.locator('a.hfpxzc')
+            
+            logging.info("Clic sur la première agence trouvée...")
+            liste_agences.first.click()
+            
             self.page.wait_for_timeout(5000)
-            logging.info(" Recherche validée !")
+            logging.info("Fiche de l'agence ouverte !")
             
         except Exception as e:
             logging.error(f"Erreur lors de la recherche : {e}")
 
+    def ouvrir_onglet_avis(self):
+        logging.info("Recherche de l'onglet 'Avis'...")
+        
+        try:
+            onglet_avis = self.page.locator("button:has-text('Avis'), button:has-text('Reviews')").first
+            onglet_avis.wait_for(timeout=5000)
+            
+            onglet_avis.click()
+            logging.info("Onglet 'Avis' ouvert avec succès !")
+            
+            self.page.wait_for_timeout(3000)
+            
+        except Exception as e:
+            logging.error(f"Impossible de trouver l'onglet Avis : {e}")
 
 if __name__ == "__main__":
     scraper = GoogleMapsScraper()
@@ -63,6 +81,8 @@ if __name__ == "__main__":
     scraper.ouvrir_et_gerer_cookies()
     
     scraper.chercher_agence("CIH Bank", "Rabat")
+
+    scraper.ouvrir_onglet_avis()
     
     time.sleep(5) 
     
