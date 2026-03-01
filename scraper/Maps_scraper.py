@@ -64,16 +64,53 @@ class GoogleMapsScraper:
         logging.info("Recherche de l'onglet 'Avis'...")
         
         try:
-            onglet_avis = self.page.locator("button:has-text('Avis'), button:has-text('Reviews')").first
+            selecteur_onglet = 'button[role="tab"]:has-text("Avis"), button[role="tab"]:has-text("Reviews")'
+            
+            onglet_avis = self.page.locator(selecteur_onglet).first
+            
             onglet_avis.wait_for(timeout=5000)
             
             onglet_avis.click()
-            logging.info("Onglet 'Avis' ouvert avec succès !")
+            logging.info("✅ Onglet 'Avis' cliqué avec succès !")
             
             self.page.wait_for_timeout(3000)
             
         except Exception as e:
             logging.error(f"Impossible de trouver l'onglet Avis : {e}")
+
+            
+    def scroller_avis(self, objectif_avis=20):
+        logging.info(f"Début du scroll pour atteindre au moins {objectif_avis} avis...")
+        
+        try:
+            selecteur = ".jftiEf"
+            logging.info("Attente de l'apparition du premier avis...")
+            self.page.wait_for_selector(selecteur, timeout=10000)
+            
+            while True:
+                compte_actuel = self.page.locator(selecteur).count()
+                logging.info(f"Avis actuellement chargés : {compte_actuel}")
+                
+                if compte_actuel >= objectif_avis:
+                    logging.info("Objectif atteint ! On arrête le scroll.")
+                    break
+                
+                if compte_actuel == 0:
+                    logging.info("Cette agence n'a aucun avis.")
+                    break
+                
+                dernier_avis = self.page.locator(selecteur).nth(compte_actuel - 1)
+                dernier_avis.scroll_into_view_if_needed()
+                
+                self.page.wait_for_timeout(3000)
+                
+                nouveau_compte = self.page.locator(selecteur).count()
+                if nouveau_compte == compte_actuel:
+                    logging.info("Fin de la liste atteinte ou chargement bloqué. On arrête.")
+                    break
+                    
+        except Exception as e:
+            logging.error(f"Erreur pendant le scroll : {e}")
 
 if __name__ == "__main__":
     scraper = GoogleMapsScraper()
@@ -83,6 +120,8 @@ if __name__ == "__main__":
     scraper.chercher_agence("CIH Bank", "Rabat")
 
     scraper.ouvrir_onglet_avis()
+
+    scraper.scroller_avis(objectif_avis=20)
     
     time.sleep(5) 
     
