@@ -83,8 +83,7 @@ def load_json_to_postgres(filepath, conn):
 
 
 if __name__ == "__main__":
-    fichier_json = "data/raw/cih_rabat_raw.json"
-    
+    fichier_json = "data/raw/maroc_banks_reviews_raw.json"    
     logging.info("Tentative de connexion à PostgreSQL...")
     connexion = connect_to_db()
     
