@@ -2,13 +2,16 @@
 venv/
 env/
 .venv/
+venv_linux/
 
 # Data Files
 data/
 
-# Logs
+# Logs & dbt Artifacts
 logs/
 *.log
+transform_bank_reviews/logs/
+transform_bank_reviews/target/
 
 # Environment Variables
 .env
