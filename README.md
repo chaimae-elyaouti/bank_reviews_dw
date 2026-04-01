@@ -24,4 +24,4 @@ We are building a fully operational data pipeline using modern tools (Airflow, D
 * **Scheduling:** Apache Airflow
 * **Data Storage:** PostgreSQL (Data Warehouse)
 * **Transformation:** DBT (Data Build Tool)
-* **Analysis & BI:** Looker Studio .
+* **Analysis & BI:** Looker Studio ..
