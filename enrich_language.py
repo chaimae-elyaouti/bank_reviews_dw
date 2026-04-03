@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 import psycopg2  
 from langdetect import detect, DetectorFactory 
 from psycopg2.extras import RealDictCursor 
@@ -6,11 +8,10 @@ DetectorFactory.seed = 0
 
 def get_connection():
     return psycopg2.connect(
-        host="172.25.4.85",
-        database="bank_reviews_dw",
-        user="chaimae",
-        password="chaimae1234", 
-        port="5432"
+        host=os.getenv("DB_HOST"),
+        database=os.getenv("DB_NAME"),
+        user=os.getenv("DB_USER"),
+        password=os.getenv("DB_PASS")
     )
 
 
