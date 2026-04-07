@@ -1,24 +1,14 @@
-import os
-from dotenv import load_dotenv
-import psycopg2  
-from langdetect import detect, DetectorFactory 
-from psycopg2.extras import RealDictCursor 
+import psycopg2
+import re
+from langdetect import detect, DetectorFactory
+from psycopg2.extras import RealDictCursor
+from db_utils import get_connection
 
 DetectorFactory.seed = 0
-
-def get_connection():
-    return psycopg2.connect(
-        host=os.getenv("DB_HOST"),
-        database=os.getenv("DB_NAME"),
-        user=os.getenv("DB_USER"),
-        password=os.getenv("DB_PASS")
-    )
-
-
 def clean_language(detected_lang, text):
     text_lower = text.lower()
     
-    is_darija_pattern = re.search(r'[a-z][379]|[379][a-z]', text_lower)
+    is_darija_pattern = re.search(r'[a-zA-Z][379]|[379][a-zA-Z]', text_lower)
     
     if is_darija_pattern:
         return 'darija_latin'
@@ -36,7 +26,8 @@ def clean_language(detected_lang, text):
 def enrich_data():
     conn = get_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-    cur.execute("ALTER TABLE stg_enriched_reviews ADD COLUMN IF NOT EXISTS language VARCHAR(10);")
+    cur.execute("ALTER TABLE stg_enriched_reviews ADD COLUMN IF NOT EXISTS language VARCHAR(25);")
+    cur.execute("ALTER TABLE stg_enriched_reviews ALTER COLUMN language TYPE VARCHAR(25);")
     cur.execute("SELECT review_id, review_text FROM stg_enriched_reviews")
     rows = cur.fetchall()
     

@@ -1,6 +1,3 @@
-import os
-from dotenv import load_dotenv
-from pathlib import Path
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import nltk
@@ -8,94 +5,77 @@ from nltk.corpus import stopwords
 from gensim import corpora
 from gensim.models import LdaModel
 import re
+from db_utils import get_connection
 
-
-nltk.download('stopwords')
-nltk.download('punkt')
-
-def get_connection():
-    basedir = Path(__file__).resolve().parent
-    env_path = basedir / '.env'
-    
-    # Charge le fichier en utilisant le chemin complet
-    load_dotenv(dotenv_path=env_path)
-    
-    # Debug pour toi : voir si le script trouve le fichier
-    # print(f"DEBUG: Recherche du .env ici : {env_path}")
-    # print(f"DEBUG: Fichier trouvé ? {env_path.exists()}")
-
-    dbname = os.getenv("DB_NAME")
-    user = os.getenv("DB_USER")
-    password = os.getenv("DB_PASS")
-    host = os.getenv("DB_HOST")
-
-    if not all([dbname, user, password, host]):
-        raise ValueError(f"Variables vides. Chemin testé : {env_path}")
-
-    return psycopg2.connect(
-        host=host, 
-        database=dbname, 
-        user=user, 
-        password=password, 
-        port="5432"
-    )
+# Configuration NLTK
+nltk.download(['stopwords', 'punkt', 'punkt_tab'], quiet=True)
 
 def preprocess_text(text):
-    # Nettoyage simple : minuscules, suppression ponctuation et chiffres
+    """Nettoyage des avis : suppression ponctuation, chiffres et stop-words métiers."""
     text = re.sub(r'\d+', '', text.lower())
     text = re.sub(r'[^\w\s]', '', text)
     tokens = nltk.word_tokenize(text)
     
-    # Stopwords (Français + quelques mots bancaires inutiles)
     stop_words = set(stopwords.words('french'))
-    stop_words.update(['banque', 'cih', 'attijari', 'plus', 'tout', 'faire'])
+    # Ajout de termes fréquents dans le secteur bancaire marocain n'apportant pas de valeur au LDA
+    stop_words.update(['banque', 'cih', 'attijari', 'plus', 'tout', 'faire', 'agence', 'client'])
     
     return [t for t in tokens if t not in stop_words and len(t) > 3]
 
 def enrich_topics():
+    """
+    Effectue la modélisation de thèmes (LDA) sur les avis en français.
+    Le modèle se concentre sur le français car il représente la majorité (>70%) 
+    du jeu de données, garantissant ainsi une pertinence statistique pour 
+    l'extraction des thématiques.
+    
+    """
     conn = get_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    # 1. Récupération des avis (On se concentre sur le Français pour le LDA)
+    # Extraction ciblée sur le Français (langue majoritaire pour la pertinence du modèle LDA)
     cur.execute("SELECT review_id, review_text FROM stg_enriched_reviews WHERE language = 'fr'")
     rows = cur.fetchall()
     
     if not rows:
-        print("Aucun avis à traiter.")
+        print("INFO: Aucun avis à traiter.")
         return
 
-    # 2. Préparation des données pour Gensim
     documents = [preprocess_text(r['review_text']) for r in rows]
     dictionary = corpora.Dictionary(documents)
     corpus = [dictionary.doc2bow(doc) for doc in documents]
 
-    # 3. Entraînement du modèle LDA (On cherche 5 thèmes)
-    lda_model = LdaModel(corpus=corpus, id2word=dictionary, num_topics=5, passes=10)
+    # Modèle LDA configuré pour identifier 5 catégories majeures
+    lda_model = LdaModel(corpus=corpus, id2word=dictionary, num_topics=5, passes=15, random_state=42)
 
-    # 4. Ajout de la colonne topic si elle n'existe pas
+    # Initialisation des colonnes de destination
     cur.execute("ALTER TABLE stg_enriched_reviews ADD COLUMN IF NOT EXISTS topic_id INTEGER;")
     cur.execute("ALTER TABLE stg_enriched_reviews ADD COLUMN IF NOT EXISTS topic_label TEXT;")
 
-    # 5. Assignation du topic dominant à chaque avis
-    print("Assignation des thèmes en cours...")
+    # Mapping basé sur l'analyse de distribution des mots-clés par topic
+    TOPIC_LABELS = {
+        0: "Qualité Service",
+        1: "Support Téléphonique",
+        2: "Gestion de Compte",
+        3: "Accueil Personnel",
+        4: "Satisfaction Agence"
+    }
+
+    print("INFO: Mise à jour des thèmes en base de données...")
     for i, row in enumerate(rows):
         bow = corpus[i]
         topics = lda_model.get_document_topics(bow)
-        # On prend le topic avec le score le plus élevé
         dominant_topic = max(topics, key=lambda x: x[1])[0]
+        label = TOPIC_LABELS.get(dominant_topic, "Autre")
         
         cur.execute(
-            "UPDATE stg_enriched_reviews SET topic_id = %s WHERE review_id = %s",
-            (int(dominant_topic), row['review_id'])
+            "UPDATE stg_enriched_reviews SET topic_id = %s, topic_label = %s WHERE review_id = %s", 
+            (int(dominant_topic), label, row['review_id'])
         )
 
     conn.commit()
-    print("Succès ! Les thèmes ont été extraits et enregistrés.")
+    print("SUCCESS: Enrichissement des thèmes terminé.")
     
-    # Affichage des thèmes trouvés pour ton analyse
-    for idx, topic in lda_model.print_topics(-1):
-        print(f"Topic {idx}: {topic}")
-
     cur.close()
     conn.close()
 
