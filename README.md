@@ -204,8 +204,8 @@ bank_reviews_dw/
 
 ## 👩‍💻 Author
 
-Chaimae
-Data Science & Data Engineering Student
+Chaimae El Yaouti
+Data Science Engineering Student
 
 ---
 
