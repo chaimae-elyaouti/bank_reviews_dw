@@ -14,7 +14,9 @@ SELECT
 
     review_id,
 
-    UPPER(bank_name) as bank_name,      
+    UPPER(bank_name) as bank_name,  
+
+    branch_address,    
 
     reviewer_name as user_name,
 
