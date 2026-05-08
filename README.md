@@ -4,62 +4,68 @@
 *"Analyzing Customer Reviews of Bank Agencies in Morocco using a Modern Data Stack"*
 
 ---
+## 📊 Executive Dashboard
+*A high-level view of the banking sentiment landscape in Morocco (2020-2026).*
+
+![Looker Studio Dashboard](dashboard-1.png)
+
+---
 
 ## 🎯 Objective
+Ce projet automatise la **collecte, le traitement et l'analyse** des avis Google Maps pour les banques marocaines. Il transforme des données textuelles non structurées (verbatims clients) en indicateurs fiables de performance et d’expérience client.
 
-This project automates the **collection, processing, and analysis** of Google Maps reviews for Moroccan banks.
-
-It aims to extract **actionable insights** from a complex **multilingual dataset** (Arabic, French, English, and Darija) using advanced NLP techniques such as:
-
-* Sentiment Analysis
+Il vise à extraire des **insights actionnables** d'un dataset **multilingue** complexe (Arabe, Français, Anglais, et Darija) via :
+* Sentiment Analysis (Net Sentiment Score)
 * Topic Modeling (LDA)
 * Language Detection
 
 ---
 
 ## 🏗️ Architecture & Pipeline Workflow
+Le projet repose sur une **Modern Data Stack** complète, orchestrée par **Apache Airflow**.
 
-The project follows a **modern ELT (Extract, Load, Transform)** architecture orchestrated by **Apache Airflow**.
+![Project Architecture](architecture-3.png)
 
-### 🔄 Pipeline Steps
+### 🔄 Pipeline Steps (Orchestration)
+Le flux de données est automatisé de bout en bout. Voici la vue du DAG dans Airflow :
 
-#### 1️⃣ Extraction (API Layer)
+![Airflow DAG Process](Airflow-4.png)
 
-* Data is collected from **Google Maps reviews** using the **Apify API**
-* Ensures **high reliability and scalability**
-* Output format: JSON
+1.  **Extraction (API Layer)** : Collecte via Apify API (JSON).
+2.  **Loading (PostgreSQL)** : Ingestion brute pour préserver l'intégrité.
+3.  **Transformation (dbt)** : Nettoyage et modélisation en étoile (Star Schema).
+4.  **NLP Enrichment (Python)** : Détection de langue, LDA (Thématiques) et Sentiment Analysis.
 
-#### 2️⃣ Loading (Raw Layer - PostgreSQL)
+---
 
-* Raw data is ingested into a **PostgreSQL database**
-* Stored in a **Raw Layer** without transformation
-* Preserves data integrity for reproducibility
+## 🛠️ Data Modeling & Engineering
+### Transformation avec dbt
+Le projet utilise **dbt (Data Build Tool)** pour transformer la donnée brute en tables analytiques (Marts). La structure suit les meilleures pratiques de modularité.
 
-#### 3️⃣ Transformation (dbt Layer)
+![dbt Model Structure](Modélisation%20SQL%20modulaire%20avec%20dbt-6.png)
 
-* Data is cleaned and structured using **dbt**
-* Creation of:
+### Focus sur le Code (DAG Airflow)
+Voici un aperçu de l'implémentation des tâches via le `BashOperator` :
 
-  * Staging tables
-  * Cleaned analytical datasets
-* Ensures **modularity and maintainability**
+![Airflow DAG Code](bank_reviews_dag.py-5.jpg)
 
-#### 4️⃣ NLP Enrichment (Python / AI Layer)
+---
 
-* **Language Detection**
+## 📈 Key Insights & Results
 
-  * French
-  * Arabic
-  * Latin-alphabet Darija
+### 🏦 Zoom sur un cas notable : Umnia Bank
+Seule banque affichant un score nettement positif, témoignant d'une forte adhésion client.
 
-* **Topic Modeling (LDA)**
+![Umnia Bank Dashboard](umnia_bank-2.png)
 
-  * Extracts key themes from reviews
-  * Trained on **French reviews (71% of dataset)**
+### Indicateurs développés
+* **Net Sentiment Score (NSS) :** Mesure la satisfaction nette (de -100 à +100).
+* **Indice de polarisation (1,63) :** Mesure le niveau de clivage des avis clients.
 
-* **Sentiment Analysis**
-
-  * Detects polarity (Positive / Negative / Neutral)
+### Enseignements majeurs
+* **Sentiment global négatif (-49,78%) :** L'insatisfaction est structurelle.
+* **Crise opérationnelle :** La Gestion de compte, la Qualité de service et l'Accueil affichent un NSS proche de -65%.
+* **Fracture territoriale :** Casablanca (-66,90%) subit une forte pression opérationnelle vs Rabat (-42,17%).
 
 ---
 
