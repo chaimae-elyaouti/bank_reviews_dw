@@ -1,17 +1,17 @@
-# 🏦 Moroccan Bank Reviews - Data Warehouse & NLP Pipeline
+#  Moroccan Bank Reviews - Data Warehouse & NLP Pipeline
 
 **Project Title:**
 *"Analyzing Customer Reviews of Bank Agencies in Morocco using a Modern Data Stack"*
 
 ---
-## 📊 Executive Dashboard
+##  Executive Dashboard
 *A high-level view of the banking sentiment landscape in Morocco (2020-2026).*
 
 ![Looker Studio Dashboard](dashboard-1.png)
 
 ---
 
-## 🎯 Objective
+##  Objective
 Ce projet automatise la **collecte, le traitement et l'analyse** des avis Google Maps pour les banques marocaines. Il transforme des données textuelles non structurées (verbatims clients) en indicateurs fiables de performance et d’expérience client.
 
 Il vise à extraire des **insights actionnables** d'un dataset **multilingue** complexe (Arabe, Français, Anglais, et Darija) via :
@@ -21,12 +21,12 @@ Il vise à extraire des **insights actionnables** d'un dataset **multilingue** c
 
 ---
 
-## 🏗️ Architecture & Pipeline Workflow
+##  Architecture & Pipeline Workflow
 Le projet repose sur une **Modern Data Stack** complète, orchestrée par **Apache Airflow**.
 
 ![Project Architecture](architecture-3.png)
 
-### 🔄 Pipeline Steps (Orchestration)
+###  Pipeline Steps (Orchestration)
 Le flux de données est automatisé de bout en bout. Voici la vue du DAG dans Airflow :
 
 ![Airflow DAG Process](Airflow-4.png)
@@ -51,9 +51,9 @@ Voici un aperçu de l'implémentation des tâches via le `BashOperator` :
 
 ---
 
-## 📈 Key Insights & Results
+##  Key Insights & Results
 
-### 🏦 Zoom sur un cas notable : Umnia Bank
+###  Zoom sur un cas notable : Umnia Bank
 Seule banque affichant un score nettement positif, témoignant d'une forte adhésion client.
 
 ![Umnia Bank Dashboard](umnia_bank-2.png)
@@ -69,7 +69,7 @@ Seule banque affichant un score nettement positif, témoignant d'une forte adhé
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer           | Tools                         |
 | --------------- | ----------------------------- |
@@ -82,9 +82,9 @@ Seule banque affichant un score nettement positif, témoignant d'une forte adhé
 
 ---
 
-## 🚀 Installation & Setup
+##  Installation & Setup
 
-### 1️⃣ Prerequisites
+### 1️ Prerequisites
 
 * WSL2 (Ubuntu)
 * Python 3.9+
@@ -93,7 +93,7 @@ Seule banque affichant un score nettement positif, témoignant d'une forte adhé
 
 ---
 
-### 2️⃣ Clone Repository
+### 2 Clone Repository
 
 ```bash
 git clone https://github.com/votre-username/bank_reviews_dw.git
@@ -102,7 +102,7 @@ cd bank_reviews_dw
 
 ---
 
-### 3️⃣ Virtual Environment
+### 3️ Virtual Environment
 
 ```bash
 python3 -m venv venv_linux
@@ -112,7 +112,7 @@ pip install -r requirements.txt
 
 ---
 
-### 4️⃣ Environment Variables
+### 4️ Environment Variables
 
 Create `.env` file:
 
@@ -165,25 +165,25 @@ airflow scheduler
 
 ---
 
-## 📊 Key Insights
+##  Key Insights
 
-### 🌍 Multilingual Processing
+###  Multilingual Processing
 
 Handles French, Arabic, and Darija (~82% accuracy)
 
-### 🧠 Automated Insights
+###  Automated Insights
 
 * Customer Support
 * Staff Behavior
 * Account Issues
 
-### ⚡ Scalability
+###  Scalability
 
 Portable and easy to deploy
 
 ---
 
-## 📈 Future Improvements
+##  Future Improvements
 
 * BERT for sentiment analysis
 * Better Arabic NLP
@@ -192,7 +192,7 @@ Portable and easy to deploy
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 ```bash
 bank_reviews_dw/
@@ -215,7 +215,7 @@ Data Science Engineering Student
 
 ---
 
-## ⭐ Acknowledgments
+##  Acknowledgments
 
 * Google Maps
 * Apify
